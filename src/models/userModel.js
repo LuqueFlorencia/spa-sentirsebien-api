@@ -1,28 +1,42 @@
 const db = require("../config/firebase");
 
-// Obtener todos los usuarios
-const getUsers = async () => {
-    const snapshot = await db.collection("users").get();
+const getUsers = async (userType) => {
+    let query = db.collection("users");
+
+    if (userType) {
+        query = query.where("userType", "==", userType);
+    }
+
+    const snapshot = await query.get();
     return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
 };
 
-// Crear un usuario
-const addUser = async (userData) => {
-    const ref = await db.collection("users").add(userData);
-    return { id: ref.id, ...userData };
+
+const updateUser = async (email, userData) => {
+    const snapshot = await db.collection("users")
+                                 .where("email", "==", email)
+                                 .limit(1)
+                                 .get();
+    
+    if (snapshot.empty) return false;    
+
+    const doc = snapshot.docs[0];                             
+    await db.collection("users").doc(doc.id).update(userData);    
+    return true;
 };
 
-// Obtener usuario por username
-const getUser = async (id) => {
-    const doc = await db.collection("users").where("username","==",id).get();
-    if (doc.empty) return null;
-    return doc.docs.map(doc => ({ ...doc.data()}));
+
+const deleteUser = async (email) => {
+    const snapshot = await db.collection("users")
+                            .where("email", "==", email)
+                            .limit(1)
+                            .get();
+
+    if (snapshot.empty) return false;
+
+    const doc = snapshot.docs[0];
+    await db.collection("users").doc(doc.id).delete();
+    return true;
 };
 
-// Eliminar usuario
-const deleteUser = async (id) => {
-    await db.collection("users").doc(id).delete();
-    return { message: "Usuario eliminado" };
-};
-
-module.exports = { getUsers, addUser, getUser, deleteUser };
+module.exports = { getUsers, updateUser, deleteUser };

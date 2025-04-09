@@ -10,6 +10,9 @@ Este proyecto es una API desarrollada en Node.js que utiliza Firebase-Firestore 
 * Firebase Firestore
 * dotenv (para gestión de variables de entorno)
 * nodemon (para desarrollo de recarga automática)
+* JsonWebToken (para gestionar la autorización/autenticación de usuarios)
+* BCryptJS (para cifrar las contraseñas antes del guardado en la BD)
+* Swagger (para documentar y probar endopoints desde una interfaz web)
 
 ***Requisitos***
 * Node.js
@@ -32,6 +35,7 @@ cd tu-repo'*
 4. Configurar las variables de entorno: Crear un archivo .env dentro de ./src/ del proyecto con el siguiente contenido:
 
 PORT = 3000
+JWT_SECRET=miClaveJWTsuperSegura2025!
 FIREBASE_PROJECT_ID = spa-sentirsebien-api
 FIREBASE_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\nMIIEv...\n-----END PRIVATE KEY-----\n"
 FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@spa-sentirsebien-api.iam.gserviceaccount.com"
@@ -47,11 +51,16 @@ Sin nodemon:
  ├── 📁 src/
  │   ├── 📁 config/
  │   │   ├── firebase.js
+ │   ├── 📁 controllers/
+ │   │   ├── *.js
+ │   ├── 📁 middlewares/
+ │   │   ├── *.js
  │   ├── 📁 models/
- │   │   ├── userModel.js
+ │   │   ├── *.js
  │   ├── 📁 routes/
- │   │   ├── userRoutes.js
+ │   │   ├── *.js
  │   ├── server.js
+ │   ├── swagger.js
  │   ├── .env   # Si corres el servidor con el comando *nodemon .\server.js* el .env debe estar aca
  ├── .env       # Si corres el servidor con el comando *npm run dev* el .env debe estar aca
  ├── .gitignore

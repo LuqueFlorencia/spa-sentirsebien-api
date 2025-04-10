@@ -40,7 +40,7 @@ npm install --save-dev nodemon
 4. Configurar las variables de entorno: Crear un archivo .env dentro de ./src/ del proyecto con el siguiente contenido:
 ```
 PORT = 3000
-JWT_SECRET=miClaveJWTsuperSegura2025!
+JWT_SECRET=fa9f1dc844bdab186a8f650c6e9b781bfcfdb58d5e142cbd7a09dc233047d299
 FIREBASE_PROJECT_ID = spa-sentirsebien-api
 FIREBASE_PRIVATE_KEY = "-----BEGIN PRIVATE KEY-----\nMIIEv...\n-----END PRIVATE KEY-----\n"
 FIREBASE_CLIENT_EMAIL = "firebase-adminsdk-fbsvc@spa-sentirsebien-api.iam.gserviceaccount.com"

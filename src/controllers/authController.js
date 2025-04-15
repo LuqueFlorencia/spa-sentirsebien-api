@@ -40,6 +40,9 @@ const login = async (req, res) => {
         };
         const secret = process.env.JWT_SECRET;
         const token = jwt.sign(payload, secret, { expiresIn: '2h' });
+        payload.name = user.name
+        payload.lastname = user.lastname
+        payload.telephone = user.telephone
 
         return res.status(200).json({ message: "Login exitoso", token, user: payload });
     } catch (error) {

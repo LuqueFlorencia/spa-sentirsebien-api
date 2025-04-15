@@ -35,7 +35,9 @@ const getAppts = async(rol, userId, state) => {
                 id: data.serviceId.id,
                 name: serviceData?.name,
                 professionalId: serviceData?.professional.id,
-                professionalLastname: professionalData?.lastname
+                professionalLastname: professionalData?.lastname,
+                durationMin: serviceData?.durationMin,
+                price: serviceData?.price
             };
         }
 

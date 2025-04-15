@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const authController = require("../controllers/authController");
 
-/**
+ /**
  * @swagger
  * /auth/login:
  *   post:
@@ -28,7 +28,7 @@ const authController = require("../controllers/authController");
  *       404:
  *         description: Usuario no encontrado 
  */
-router.post("/login", authController.login);
+router.post("/login", authController.login); //auth/login
 
 /**
  * @swagger
@@ -63,13 +63,17 @@ router.post("/login", authController.login);
  *                 enum: [cliente, profesional]
  *               telephone:
  *                 type: string
+ *               title:
+ *                 type: string
+ *               description:
+ *                 type: string
  *     responses:
- *       201:
+ *       200:
  *         description: Usuario creado exitosamente
  *       400:
  *         description: Faltan campos obligatorios; Email invalido o ya registrado; Tipo de usuario invalido 
  */
-router.post("/register", authController.register);
+router.post("/register", authController.register); //auth/register
 
 /**
  * @swagger
@@ -93,6 +97,6 @@ router.post("/register", authController.register);
  *       404:
  *         description: Email invalido; Usuario no asociado al mail proporcionado 
  */
-router.post("/resetPassword", authController.resetPassword);
+router.post("/resetPassword", authController.resetPassword); //auth/resetPassword
 
 module.exports = router;

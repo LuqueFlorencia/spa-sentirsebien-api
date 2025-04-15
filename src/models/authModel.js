@@ -9,11 +9,9 @@ const searchUser = async(email) => {
     return snapshot.empty ? null : snapshot.docs[0];
 };
 
-
 const addUser = async(userData) => {
     return await db.collection("users").add(userData);
 };
-
 
 const resetPassword = async (email) => {
     const snapshot = await db.collection("users")
@@ -26,7 +24,7 @@ const resetPassword = async (email) => {
     const userDoc = snapshot.docs[0];
     const userId = userDoc.id;
 
-    const newPassword = "passGenerica123";
+    const newPassword = "pass123";
     await db.collection("users").doc(userId).update({ password: newPassword });
 
     return userId;

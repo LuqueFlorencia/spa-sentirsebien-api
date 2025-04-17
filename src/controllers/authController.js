@@ -11,9 +11,9 @@ require('dotenv').config();
   "lastname": "Apellido"
   "telephone": "123456789",     // (opcional)
   "userType": "cliente",        // cliente | profesional
-  "title": "titulo",            // solo si es profesional
-  "description": "descripcion " // solo si es profesional
-  "tags": ["tag", "tag"],       // solo si es profesional
+  "certification": "titulo",    // solo si es profesional
+  "bio": "descripcion "         // solo si es profesional
+  "specialties": ["tag", "tag"],// solo si es profesional
   "availability": [{ 0: ["9:00",true], ["10:00",false]}, { 1: ["9:00",true]}]
   "state": true
 } */
@@ -31,7 +31,7 @@ const login = async (req, res) => {
 
         const user = userDoc.data();
         if (password !== user.password)
-            return res.status(401).json({ message: "Contraseña incorrecta" });
+            return res.status(401).json({ message: "Usuario y/o Contraseña incorrecta" });
 
         const payload = {
             id: userDoc.id,
@@ -53,40 +53,32 @@ const login = async (req, res) => {
 
 const register = async (req, res) => {
     try {
-        const { email, password, name, lastname, telephone, userType, title, description } = req.body;
-        const state = true;
-
-        if (!email || !password || !name || !lastname || !userType || !telephone)
-            return res.status(400).json({ message: "Faltan campos obligatorios" });
+        const { email, password, name, lastname, telephone, userType, specialties, certification, bio } = req.body;
 
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
         if (!emailRegex.test(email))
             return res.status(400).json({ message: "Email inválido" });
-
         if (!['cliente', 'profesional'].includes(userType))
             return res.status(400).json({ message: "Tipo de usuario inválido" });
-
         const existingUser = await AuthModel.searchUser(email);
         if (existingUser)
             return res.status(400).json({ message: "El email ya está registrado" });
-
-        if (userType === "profesional")
-            state = false;
 
         const newUser = {
             email,
             password,
             name,
             lastname,
-            telephone: telephone,
+            telephone,
             userType,
-            state: state
-        };
+            state : true
+        };        
 
-        if (userType === 'profesional') {
-            newUser.title = title || null;
-            newUser.description = description || null;
-            newUser.tags = [];
+        if (userType === "profesional") {
+            newUser.certification = certification || null;
+            newUser.bio = bio || null;
+            newUser.specialties = specialties || null;
+            newUser.state = false;
         }
 
         const docRef = await AuthModel.addUser(newUser);

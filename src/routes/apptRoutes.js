@@ -28,7 +28,7 @@ const authMiddleware = require("../middlewares/authMiddleware");
  *       403:
  *         description: No autorizado para consultar turnos
  */
-router.get("/allAppt/", authMiddleware, apptController.getAppts); //appointments solo o /appointments?state=
+router.get("/allAppt/", authMiddleware, apptController.getAppts); //appointments/allAppt solo o /appointments/allAppt?state=
 
 /**
  * @swagger
@@ -148,7 +148,7 @@ router.put("/cancel/:id", authMiddleware, apptController.cancelAppt); //appointm
  *       403:
  *         description: No autorizado para confirmar un turno
  */
-router.put("/confirm/:id", authMiddleware, apptController.updateAppt); //appointments/confirm/{id}
+router.put("/confirm/:id", authMiddleware, apptController.confirmAppt); //appointments/confirm/{id}
 
 /**
  * @swagger

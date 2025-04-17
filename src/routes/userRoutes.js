@@ -58,13 +58,6 @@ router.get("/:email", userController.getUserByEmail); //users/{email}
  *     tags: [Usuarios]
  *     security:
  *       - bearerAuth: []
- *     parameters:
- *       - in: query
- *         name: email
- *         required: true
- *         schema:
- *           type: string
- *         description: Email del usuario a actualizar
  *     requestBody:
  *       required: true
  *       content:
@@ -116,19 +109,19 @@ router.post("/:id/setDates", authMiddleware, userController.setDailyDates); //us
 
 /**
  * @swagger
- * /users:
+ * /users/{id}:
  *   delete:
- *     summary: Eliminar un usuario por email (solo admin)
+ *     summary: Eliminar un usuario (solo admin)
  *     tags: [Usuarios]
  *     security:
  *       - bearerAuth: []
  *     parameters:
- *       - in: query
- *         name: email
+ *       - in: path
+ *         name: id
  *         required: true
  *         schema:
  *           type: string
- *         description: Email del usuario a eliminar
+ *         description: ID del usuario a eliminar
  *     responses:
  *       200:
  *         description: Usuario eliminado correctamente
@@ -137,11 +130,11 @@ router.post("/:id/setDates", authMiddleware, userController.setDailyDates); //us
  *       404:
  *         description: Usuario no encontrado
  */
-router.delete("/", authMiddleware, userController.deleteUser); //users?email=asd@example.com
+router.delete("/:id", authMiddleware, userController.deleteUser);
 
 /**
  * @swagger
- * /users/aproveUser/{id}:
+ * /users/approveUser/{id}:
  *   put:
  *     summary: Aprobar profesional (solo admin)
  *     tags: [Usuarios]
@@ -161,6 +154,6 @@ router.delete("/", authMiddleware, userController.deleteUser); //users?email=asd
  *       403:
  *         description: No autorizado para aprobar a un usuario
  */
-router.put("/aproveUser/:id", authMiddleware, userController.aproveUser); //users/aproveUser/{id}
+router.put("/approveUser/:id", authMiddleware, userController.approveUser); //users/approveUser/{id}
 
 module.exports = router;

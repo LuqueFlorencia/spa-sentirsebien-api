@@ -9,7 +9,7 @@ const searchUser = async(email) => {
     return snapshot.empty ? null : snapshot.docs[0];
 };
 
-const addUser = async(userData) => {
+const addUser = async(userData) => {  
     return await db.collection("users").add(userData);
 };
 

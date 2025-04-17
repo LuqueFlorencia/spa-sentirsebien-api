@@ -24,6 +24,13 @@ const getAppts = async(rol, userId, state) => {
             notes: data.notes
         };
 
+        let clientData;
+
+        if (data.clientId && typeof data.clientId.get === "function") {
+            const clientSnap = await data.clientId.get();
+            clientData = clientSnap.data();
+        }
+
         if (data.serviceId && typeof data.serviceId.get === "function") {            
             const serviceSnap = await data.serviceId.get();
             const serviceData = serviceSnap.data();
@@ -35,12 +42,14 @@ const getAppts = async(rol, userId, state) => {
                 id: data.serviceId.id,
                 name: serviceData?.name,
                 professionalId: serviceData?.professional.id,
-                professionalLastname: professionalData?.lastname,
+                professionalLastname: professionalData?.lastname + ", " + professionalData?.name,
+                clientId: clientData?.id,
+                clientLastname: clientData?.lastname + ", " + clientData?.name,
                 durationMin: serviceData?.durationMin,
-                price: serviceData?.price
+                price: serviceData?.price,
+                paymentStatus: data.paymentStatus
             };
         }
-
         return appointment;
     }));
 
@@ -106,6 +115,7 @@ const createAppointment = async({ serviceId, clienteId, date, hour, notes }) => 
             date,
             hour,
             state: "pendiente",
+            paymentStatus: "pending",
             notes: notes || null
         });
 
@@ -125,7 +135,7 @@ const cancelAppt = async (id) => {
     const availability = profData.availability;
 
     const dayName = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado", "domingo"];
-    const weekday = dayName[new Date(snapshot.data().date).getDay()];
+    const weekday = dayName[new Date(snapshot.data().date).getDay()];    
 
     const dayBlock = availability.find(d => d.day === weekday);
     const hourBlock = dayBlock.schedule.find(h => h.hour === snapshot.data().hour);
@@ -140,13 +150,12 @@ const cancelAppt = async (id) => {
     return { "isOK": true };
 };
 
-const confirmAppt = async (id) => {  
+const confirmAppt = async (id) => {    
     const snapshot = await db.collection("appointments").doc(id).get();
     if (!snapshot.exists) return { "isOK": false, "message": "No se encontro turno a confirmar" };    
     
-    const updateState = { state: "confirmado" };  
-
-    const updateAppt = await db.collection("appointments").doc(snapshot.id).update(updateState);
+    const updateState = { state: "confirmado" };     
+    const updateAppt = await db.collection("appointments").doc(snapshot.id).update(updateState);   
     if (!updateAppt) return { "isOK": false, "message": "Error al confirmar el turno" };
 
     return { "isOK": true };

@@ -139,8 +139,8 @@ const updateAppt = async (req,res) => {
 
         if (!validUsers.includes(req.user.userType))
             return res.status(403).json({ message: "No autorizado para modificar un turno" });
-
-        const response = await ApptModel.updateAppt(id, updates);
+        
+        const response = await ApptModel.updateAppt(id, updates);       
         if (!response.isOK)
             return res.status(400).json({ message: response.message } )
 
@@ -150,7 +150,7 @@ const updateAppt = async (req,res) => {
     }
 };
 
-// Cancelar un turno ya registrado
+// Confirmar un turno
 const confirmAppt = async (req,res) => {
     try {
         const id = req.params.id;

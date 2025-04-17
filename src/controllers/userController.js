@@ -36,12 +36,9 @@ const getUserByEmail = async (req, res) => {
 // Modificar datos de un perfil
 const updateUser = async (req, res) => {
     try {
-        const { email } = req.query;
+        const email = req.user.email;
         const updates = req.body;
-        
-        if (req.user.email !== email)
-            return res.status(403).json({ message: "No autorizado para actualizar este usuario" });
-        
+
         const updated = await UserModel.updateUser(email, updates);
         if (!updated.isOK)
             return res.status(404).json({ message: updated.message });
@@ -104,12 +101,12 @@ function setDates(hoursPerDay = {}) {
 // Eliminar un usuario por el email registrado
 const deleteUser = async (req, res) => {
     try {
+        const id = req.params.id;
+
         if (req.user.userType !== "admin")
             return res.status(403).json({ message: "No autorizado: solo administradores pueden eliminar usuarios." });
-
-        const { email } = req.query;
         
-        const deleted = await UserModel.deleteUser(email);
+        const deleted = await UserModel.deleteUser(id);
         if (!deleted.isOK)
             return res.status(404).json({ message: deleted.message });
 
@@ -119,14 +116,14 @@ const deleteUser = async (req, res) => {
     }
 };
 
-const aproveUser = async (req, res) => {
+const approveUser = async (req, res) => {
     try {
         const id = req.params.id;
         
         if (req.user.userType !== "admin")
             return res.status(403).json({ message: "No autorizado: solo administradores pueden confirmar registro de profesionales." });
 
-        const response = await UserModel.aproveUser(id);        
+        const response = await UserModel.approveUser(id);        
         if (!response.isOK)
             return res.status(400).json({ message: response.message });
 
@@ -136,4 +133,4 @@ const aproveUser = async (req, res) => {
     }
 };
 
-module.exports = { getUsers, getUserByEmail, updateUser, setDailyDates, deleteUser, aproveUser };
+module.exports = { getUsers, getUserByEmail, updateUser, setDailyDates, deleteUser, approveUser };

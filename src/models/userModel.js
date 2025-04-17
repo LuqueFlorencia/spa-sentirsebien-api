@@ -22,9 +22,9 @@ const getUsers = async (userType, state) => {
         };
 
         if (data.telephone) user.telephone = data.telephone;
-        if (data.title) user.title = data.title;
-        if (data.description) user.description = data.description;
-        if (data.tags && Array.isArray(data.tags)) user.tags = data.tags;
+        if (data.certification) user.certification = data.certification;
+        if (data.bio) user.bio = data.bio;
+        if (data.specialties && Array.isArray(data.specialties)) user.specialties = data.specialties;
 
         if (data.services && typeof data.services.get === "function") {
             const serviceSnap = await data.services.get();
@@ -57,9 +57,9 @@ const getUserByEmail = async (email) => {
     };
 
     if (data.telephone) user.telephone = data.telephone;
-    if (data.title) user.title = data.title;
-    if (data.description) user.description = data.description;
-    if (data.tags && Array.isArray(data.tags)) user.tags = data.tags;
+    if (data.certification) user.certification = data.certification;
+    if (data.bio) user.bio = data.bio;
+    if (data.specialties && Array.isArray(data.specialties)) user.specialties = data.specialties;
 
     if (data.services && typeof data.services.get === "function") {
         const serviceSnap = await data.services.get();
@@ -89,19 +89,17 @@ const setDailyDates = async (id, availability) => {
     await db.collection("users").doc(id).update({ availability: availability });
 };
 
-const deleteUser = async (email) => {
-    const snapshot = await db.collection("users").where("email", "==", email).limit(1).get();
-    if (snapshot.empty) return { "isOK": false, "message": "No se encontro el usuario" };
+const deleteUser = async (id) => {
+    const snapshot = await db.collection("users").doc(id).get();
+    if (!snapshot.exists) return { "isOK": false, "message": "No se encontro el usuario" };
 
-    const doc = snapshot.docs[0];
-
-    const response = await db.collection("users").doc(doc.id).delete();
+    const response = await db.collection("users").doc(snapshot.id).delete();
     if (!response) return { "isOK": false, "message":"Error al eliminar el usuario" };
 
     return { "isOK": true };
 };
 
-const aproveUser = async (id) => {  
+const approveUser = async (id) => {  
     const snapshot = await db.collection("users").doc(id).get();
     if (!snapshot.exists) return { "isOK": false, "message": "No se encontro el usuario a activar" };    
     
@@ -113,4 +111,4 @@ const aproveUser = async (id) => {
     return { "isOK": true };
 };
 
-module.exports = { getUsers, getUserByEmail, updateUser, setDailyDates, deleteUser, aproveUser };
+module.exports = { getUsers, getUserByEmail, updateUser, setDailyDates, deleteUser, approveUser };

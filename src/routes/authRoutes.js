@@ -24,7 +24,7 @@ const authController = require("../controllers/authController");
  *       200:
  *         description: Login exitoso
  *       401:
- *         description: Contraseña incorrecta 
+ *         description: Usuario y/o Contraseña incorrecta
  *       404:
  *         description: Usuario no encontrado 
  */
@@ -63,15 +63,17 @@ router.post("/login", authController.login); //auth/login
  *                 enum: [cliente, profesional]
  *               telephone:
  *                 type: string
- *               title:
+ *               specialities:
+ *                 type: array
+ *               certification:
  *                 type: string
- *               description:
+ *               bio:
  *                 type: string
  *     responses:
  *       200:
  *         description: Usuario creado exitosamente
  *       400:
- *         description: Faltan campos obligatorios; Email invalido o ya registrado; Tipo de usuario invalido 
+ *         description: Email invalido o ya registrado; Tipo de usuario invalido 
  */
 router.post("/register", authController.register); //auth/register
 

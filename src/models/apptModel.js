@@ -45,6 +45,8 @@ const getAppts = async(rol, userId, state) => {
                 professionalLastname: professionalData?.lastname + ", " + professionalData?.name,
                 clientId: clientData?.id,
                 clientLastname: clientData?.lastname + ", " + clientData?.name,
+                clientEmail: clientData?.email,
+                clientTelephone: clientData?.telephone,
                 durationMin: serviceData?.durationMin,
                 price: serviceData?.price,
                 paymentStatus: data.paymentStatus

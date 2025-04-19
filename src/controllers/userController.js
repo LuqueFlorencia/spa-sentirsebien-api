@@ -18,28 +18,51 @@ const getUsers = async (req, res) => {
     }
 };
 
-// Obtener usuario por email
-const getUserByEmail = async (req, res) => {
+// Obtener los clientes de un profesional especifico
+const getClients = async (req, res) => {
     try {
-        const email = req.params.email;
-        
-        const user = await UserModel.getUserByEmail(email);
-        if (!user)
-            return res.status(404).json({ message: "Usuario no encontrado" });
+        const user = req.user;
 
-        return res.status(200).json(user);
+        if (user.userType !== "profesional")
+            return res.status(403).json({ message: "No autorizado para consultar clientes" });
+
+        const clients = await UserModel.getClients(user.id);
+        return res.status(200).json(clients);
     } catch (error) {
-        return res.status(500).json({ message: "Error obteniendo el usuario especificado", error})
+        return res.status(500).json({ message: "Error obteniendo los clientes", error });
     }
 };
 
 // Modificar datos de un perfil
 const updateUser = async (req, res) => {
     try {
-        const email = req.user.email;
+        const user = req.user;
+        const updates = req.body;
+        const validUserType = ["admin", "profesional", "cliente"];
+
+        if (user.userType && !validUserType.includes(user.userType))
+            return res.status(400).json({ message: "Tipo de usuario no válido" });
+
+        const updated = await UserModel.updateUser(user.id, updates);
+        if (!updated.isOK)
+            return res.status(404).json({ message: updated.message });
+
+        return res.status(200).json({ message: "Usuario actualizado correctamente" });
+    } catch (error) {
+        return res.status(500).json({ message: "Error al actualizar usuario", error });
+    }
+};
+
+// Modificar datos de otro perfil (para admin)
+const updateUserById = async (req, res) => {
+    try {
+        const id = req.params.id;
         const updates = req.body;
 
-        const updated = await UserModel.updateUser(email, updates);
+        if (req.user.userType !== "admin")
+            return res.status(400).json({ message: "Tipo de usuario no válido" });
+
+        const updated = await UserModel.updateUser(id, updates);
         if (!updated.isOK)
             return res.status(404).json({ message: updated.message });
 
@@ -98,7 +121,7 @@ function setDates(hoursPerDay = {}) {
     });
 }
 
-// Eliminar un usuario por el email registrado
+// Eliminar un usuario
 const deleteUser = async (req, res) => {
     try {
         const id = req.params.id;
@@ -107,6 +130,24 @@ const deleteUser = async (req, res) => {
             return res.status(403).json({ message: "No autorizado: solo administradores pueden eliminar usuarios." });
         
         const deleted = await UserModel.deleteUser(id);
+        if (!deleted.isOK)
+            return res.status(404).json({ message: deleted.message });
+
+        return res.status(200).json({ message: `Usuario eliminado correctamente.` });
+    } catch (error) {
+        return res.status(500).json({ message: "Error eliminando usuario", error });
+    }
+};
+
+// Eliminar de la BD a un usuario (para rechazar solicitudes pendientes de profesionales)
+const realDeleteUser = async (req, res) => {
+    try {
+        const id = req.params.id;
+
+        if (req.user.userType !== "admin")
+            return res.status(403).json({ message: "No autorizado: solo administradores pueden eliminar usuarios." });
+        
+        const deleted = await UserModel.realDeleteUser(id);
         if (!deleted.isOK)
             return res.status(404).json({ message: deleted.message });
 
@@ -133,4 +174,13 @@ const approveUser = async (req, res) => {
     }
 };
 
-module.exports = { getUsers, getUserByEmail, updateUser, setDailyDates, deleteUser, approveUser };
+module.exports = { 
+    getUsers, 
+    getClients,
+    updateUser, 
+    updateUserById,
+    setDailyDates, 
+    deleteUser,
+    realDeleteUser, 
+    approveUser 
+};

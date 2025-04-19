@@ -31,30 +31,23 @@ router.get("/", userController.getUsers); //users solo o /users?userType=admin&s
 
 /**
  * @swagger
- * /users/{email}:
+ * /users/clients:
  *   get:
- *     summary: Obtener un usuario por su email (no auth)
+ *     summary: Obtener todos clientes de un profesional (solo prof)
  *     tags: [Usuarios]
- *     parameters:
- *       - in: path
- *         name: email
- *         required: true
- *         schema:
- *           type: string
- *         description: Email del usuario a buscar
  *     responses:
  *       200:
- *         description: Usuario encontrado con éxito
- *       404:
- *         description: Usuario no encontrado
+ *         description: Lista de usuarios obtenida con éxito
+ *       400:
+ *         description: Tipo de usuario no válido
  */
-router.get("/:email", userController.getUserByEmail); //users/{email}
+router.get("/clients/", authMiddleware, userController.getClients);
 
 /**
  * @swagger
  * /users:
  *   put:
- *     summary: Actualizar datos de un usuario (propio user)
+ *     summary: Actualizar datos del propio usuario (propio user)
  *     tags: [Usuarios]
  *     security:
  *       - bearerAuth: []
@@ -72,7 +65,38 @@ router.get("/:email", userController.getUserByEmail); //users/{email}
  *       404:
  *         description: Usuario no encontrado
  */
-router.put("/", authMiddleware, userController.updateUser); //users?email=asd@example.com
+router.put("/", authMiddleware, userController.updateUser);
+
+/**
+ * @swagger
+ * /users/{id}:
+ *   put:
+ *     summary: Actualizar datos de un tercero (solo admin)
+ *     tags: [Usuarios]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del usuario a eliminar
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *     responses:
+ *       200:
+ *         description: Usuario actualizado correctamente
+ *       403:
+ *         description: No autorizado
+ *       404:
+ *         description: Usuario no encontrado
+ */
+router.put("/:id", authMiddleware, userController.updateUserById);
 
 /**
  * @swagger
@@ -109,9 +133,34 @@ router.post("/:id/setDates", authMiddleware, userController.setDailyDates); //us
 
 /**
  * @swagger
+ * /users/delete/{id}:
+ *   put:
+ *     summary: Inactivar un usuario (solo admin)
+ *     tags: [Usuarios]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: ID del usuario a inactivar
+ *     responses:
+ *       200:
+ *         description: Usuario inactivado correctamente
+ *       403:
+ *         description: No autorizado
+ *       404:
+ *         description: Usuario no encontrado
+ */
+router.put("/delete/:id", authMiddleware, userController.deleteUser);
+
+/**
+ * @swagger
  * /users/{id}:
  *   delete:
- *     summary: Eliminar un usuario (solo admin)
+ *     summary: Eliminar de la BD a un usuario (solo admin)
  *     tags: [Usuarios]
  *     security:
  *       - bearerAuth: []
@@ -130,7 +179,7 @@ router.post("/:id/setDates", authMiddleware, userController.setDailyDates); //us
  *       404:
  *         description: Usuario no encontrado
  */
-router.delete("/:id", authMiddleware, userController.deleteUser);
+router.delete("/:id", authMiddleware, userController.realDeleteUser);
 
 /**
  * @swagger

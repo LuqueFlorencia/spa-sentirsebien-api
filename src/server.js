@@ -9,6 +9,7 @@ const swaggerSpec = require("./swagger");
 const authRoutes = require("./routes/authRoutes");
 const userRoutes = require("./routes/userRoutes");
 const apptRoutes = require("./routes/apptRoutes");
+const serviceRoutes = require("./routes/serviceRoutes");
 
 const app = express();
 app.use(cors());
@@ -21,6 +22,8 @@ app.use("/auth", authRoutes);
 app.use("/users", userRoutes);
 // Rutas de turnos
 app.use("/appointments", apptRoutes);
+// rutas de servicios
+app.use("/services", serviceRoutes);
 
 // Puerto y arranque del servidor
 const PORT = process.env.PORT || 3000;

@@ -1,0 +1,152 @@
+const db = require("../config/firebase");
+
+
+//traer todos los servicios
+const getService = async (state) => {
+    let query = db.collection("services");
+
+    if (state !== undefined) query = query.where("state", "==", state);
+
+    const snapshot = await query.get();
+
+    const response = await Promise.all(snapshot.docs.map(async (doc) => {
+        const data = doc.data();
+
+        const service = { 
+            category: data.category,
+            id: doc.id, 
+            shortDescription: data.shortDescription,
+            description: data.description,
+            durationMin: data.durationMin,
+            image: data.image,
+            isIndividual: data.isIndividual,
+            name: data.name,
+            price: data.price,
+            professional: data.professional,
+            benefits: data.benefits,
+            includes: data.includes,
+            state: data.state,
+        };
+
+        if (data.professional && typeof data.professional.get === "function") {
+            const profSnap = await data.professional.get();
+            const profData = profSnap.data();
+            service.professional = {
+                id: data.professional.id,
+                name: profData?.name || null
+            };
+        }
+
+        return service;
+    }));
+
+    return response;
+};
+
+//actualizar el servicio por id
+const updateService = async (id, serviceData) => {
+    try {
+        const doc = db.collection("services").doc(id);
+        const snapshot = await doc.get();
+
+        if (!snapshot.exists) {
+            return { isOK: false, message: "No se encontrp el servicio" };
+        }
+
+        await doc.update(serviceData);
+        return { isOK: true };
+    } catch (error) {
+        console.error("Error en serviceModel.updateService:", error);
+        return { isOK: false, message: "Error al actualizar el servicio", error };
+    }
+};
+
+
+//borrado logico por id
+const deleteService = async (id) => {
+    const snapshot = await db.collection("services").doc(id).get();
+    if (!snapshot.exists) return { isOK: false, message: "No se encontró el servicio" };
+
+    const newState = { state: false };
+
+    await db.collection("services").doc(id).update(newState);
+    return { isOK: true };
+};
+
+
+//activado por id
+const activeService = async (id) => {
+    const snapshot = await db.collection("services").doc(id).get();
+    if (!snapshot.exists) return { isOK: false, message: "No se encontró el servicio" };
+
+    const newState = { state: true };
+
+    await db.collection("services").doc(id).update(newState);
+    return { isOK: true };
+};
+
+
+//creando servicio
+//EJEMPLO
+// {
+//     "category": "Yoga",
+//     "shortDescription: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+//     "description": "Sesiones grupales que combinan posturas, respiración y meditación para el bienestar físico y mental.",
+//     "durationMin": 60,
+//     "image": "https://i.pinimg.com/736x/bd/40/70/bd40706a5caf46f4139a021298f48ad4.jpg",
+//     "isIndividual": false,
+//      "benefits": ["xxxxxx","xxxxxxxxx","xxxxxxxxxx"],
+//      "includes" : ["xxxxx,xxxx,xxxx"]
+//     "name": "Yoga",
+//     "price": 200100
+//   }
+
+
+const createService = async (data) => {
+    const { professional, name, description, category, durationMin, price, isIndividual, image, state } = data;
+
+    const snapshot = await db.collection("services")
+        .where("professional", "==", db.doc(professional))
+        .get();
+
+    const duplicate = snapshot.docs.find(doc => {
+        const s = doc.data();
+        return s.name === name &&
+            s.description === description &&
+            s.category === category &&
+            s.durationMin === durationMin &&
+            s.price === price &&
+            s.isIndividual === isIndividual &&
+            s.image === image &&
+            s.state === state;
+    });
+
+    if (duplicate) {
+        return { isOK: false, message: "El servicio ya existe" };
+    }
+
+    // Crear el nuevo servicio
+    await db.collection("services").add({
+        name,
+        description,
+        category,
+        durationMin,
+        price,
+        isIndividual,
+        image,
+        state: true,
+        professional: db.doc(professional)
+    });
+
+    return { isOK: true };
+};
+
+
+
+module.exports = {
+    getService,
+    updateService,
+    deleteService,
+    activeService,
+    createService
+};

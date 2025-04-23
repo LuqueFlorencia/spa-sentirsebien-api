@@ -1,6 +1,5 @@
 const ApptModel = require("../models/apptModel");
 const jwt = require("jsonwebtoken");
-const { Timestamp } = require("firebase-admin/firestore");
 require('dotenv').config(); 
 
 //SOLO LOS ADMIN PUEDEN HACER CAMBIOS EN LA BD SOBRE TURNOS 
@@ -19,7 +18,7 @@ require('dotenv').config();
 
 // Obtener todos los turnos
 const getAppts = async (req, res) => {
-    try {
+    try {       
         const user = req.user;
         const state = req.query.state;
         const validState = ["confirmado", "cancelado", "completado", "pendiente"];
@@ -40,7 +39,7 @@ const getAppts = async (req, res) => {
         const appointments = await ApptModel.getAppts(rol, user.id, state);
 
         return res.status(200).json(appointments);
-    } catch (error) {
+    } catch (error) {       
         return res.status(500).json({ message: "Error obteniendo turnos", error})
     }
 };
@@ -107,6 +106,8 @@ const newAppt = async (req, res) => {
 
         return res.status(200).json({ message: "Turno reservado exitosamente. Id: " + response.id });
     } catch (error) {
+        console.log(JSON.stringify(error));
+        
         return res.status(500).json({ message: "Error al registrar turno", error });
     }
 };

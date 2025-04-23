@@ -4,10 +4,27 @@ require('dotenv').config();
 // para obtener todos los servicios
 const getService = async (req, res) => {
     try {
-
         const state = req.query.state === "true" ? true : req.query.state === "false" ? false : undefined;
+        const category = req.query.category;
 
-        const services = await ServiceModel.getService(state);
+        const services = await ServiceModel.getService(state, category);
+
+        return res.status(200).json(services);
+    } catch (error) {
+        return res.status(500).json({ message: "Error obteniendo servicios", error });
+    }
+};
+
+const getProfService = async (req, res) => {
+    try {
+        const user = req.user;
+        const state = req.query.state === "true" ? true : req.query.state === "false" ? false : undefined;
+        const category = req.query.category;
+        
+        let rol;
+        if (user.userType === "profesional") rol = "profesional";
+
+        const services = await ServiceModel.getService(state, category, rol, user.id, );
 
         return res.status(200).json(services);
     } catch (error) {
@@ -22,9 +39,9 @@ const updateService = async (req, res) => {
         const updates = req.body;
         if (req.user.userType !== "admin")
             return res.status(403).json({ message: "No autorizado para actualizar servicios" });
-        if (!updates || Object.keys(updates).length === 0) {
+
+        if (!updates || Object.keys(updates).length === 0)
             return res.status(200).json({ message: "Datos de actualización vacíos" });
-        }
 
         const updated = await ServiceModel.updateService(id, updates);
 
@@ -47,7 +64,6 @@ const deleteService = async (req, res) => {
             return res.status(403).json({ message: "No autorizado: solo administradores pueden eliminar servicios." });
 
         const deleted = await ServiceModel.deleteService(id);
-
         if (!deleted.isOK)
             return res.status(404).json({ message: deleted.message });
 
@@ -103,13 +119,11 @@ const createService = async (req, res) => {
     }
 };
 
-
-
-
 module.exports = {
     getService,
+    getProfService,
     updateService,
     deleteService,
     activeService,
     createService
-    };
+};

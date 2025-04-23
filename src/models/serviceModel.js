@@ -1,11 +1,28 @@
 const db = require("../config/firebase");
 
+//creando servicio
+//EJEMPLO
+// {
+//     "category": "Yoga",
+//     "shortDescription: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+//     "description": "Sesiones grupales que combinan posturas, respiración y meditación para el bienestar físico y mental.",
+//     "duration": 60,
+//     "image": "https://i.pinimg.com/736x/bd/40/70/bd40706a5caf46f4139a021298f48ad4.jpg",
+//     "isIndividual": false,
+//      "benefits": ["xxxxxx","xxxxxxxxx","xxxxxxxxxx"],
+//      "includes" : ["xxxxx,xxxx,xxxx"]
+//     "name": "Yoga",
+//     "price": 200100
+//     "professional": /users/RL9UjLDxsVNkJ72ErDod (referencia real)
+//   }
 
 //traer todos los servicios
-const getService = async (state) => {
+const getService = async (state, category, rol, userId) => {
     let query = db.collection("services");
 
     if (state !== undefined) query = query.where("state", "==", state);
+    if (category) query = query.where("category", "==", category);
+    if (rol === "profesional") query = query.where("professional", "==", db.doc(`/users/${userId}`));
 
     const snapshot = await query.get();
 
@@ -17,7 +34,7 @@ const getService = async (state) => {
             id: doc.id, 
             shortDescription: data.shortDescription,
             description: data.description,
-            durationMin: data.durationMin,
+            duration: data.duration,
             image: data.image,
             isIndividual: data.isIndividual,
             name: data.name,
@@ -33,7 +50,7 @@ const getService = async (state) => {
             const profData = profSnap.data();
             service.professional = {
                 id: data.professional.id,
-                name: profData?.name || null
+                name: profData?.lastname + " " + profData?.name  || null
             };
         }
 
@@ -50,7 +67,7 @@ const updateService = async (id, serviceData) => {
         const snapshot = await doc.get();
 
         if (!snapshot.exists) {
-            return { isOK: false, message: "No se encontrp el servicio" };
+            return { isOK: false, message: "No se encontro el servicio" };
         }
 
         await doc.update(serviceData);
@@ -85,25 +102,8 @@ const activeService = async (id) => {
     return { isOK: true };
 };
 
-
-//creando servicio
-//EJEMPLO
-// {
-//     "category": "Yoga",
-//     "shortDescription: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-//     "description": "Sesiones grupales que combinan posturas, respiración y meditación para el bienestar físico y mental.",
-//     "durationMin": 60,
-//     "image": "https://i.pinimg.com/736x/bd/40/70/bd40706a5caf46f4139a021298f48ad4.jpg",
-//     "isIndividual": false,
-//      "benefits": ["xxxxxx","xxxxxxxxx","xxxxxxxxxx"],
-//      "includes" : ["xxxxx,xxxx,xxxx"]
-//     "name": "Yoga",
-//     "price": 200100
-//   }
-
-
 const createService = async (data) => {
-    const { professional, name, description, category, durationMin, price, isIndividual, image, state } = data;
+    const { name, shortDescription, description, category, price, duration, benefits, includes, professional,image } = data;
 
     const snapshot = await db.collection("services")
         .where("professional", "==", db.doc(professional))
@@ -113,12 +113,13 @@ const createService = async (data) => {
         const s = doc.data();
         return s.name === name &&
             s.description === description &&
+            s.shortDescription === shortDescription &&
             s.category === category &&
-            s.durationMin === durationMin &&
             s.price === price &&
-            s.isIndividual === isIndividual &&
-            s.image === image &&
-            s.state === state;
+            s.duration === duration &&
+            s.benefits === benefits &&
+            s.includes === includes &&
+            s.image === image || null
     });
 
     if (duplicate) {
@@ -129,19 +130,19 @@ const createService = async (data) => {
     await db.collection("services").add({
         name,
         description,
+        shortDescription,
         category,
-        durationMin,
+        duration,
         price,
-        isIndividual,
         image,
+        benefits,
+        includes,
         state: true,
         professional: db.doc(professional)
     });
 
     return { isOK: true };
 };
-
-
 
 module.exports = {
     getService,

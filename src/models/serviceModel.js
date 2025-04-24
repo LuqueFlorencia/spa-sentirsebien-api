@@ -109,8 +109,10 @@ const activeService = async (id) => {
 const createService = async (data) => {
     const { name, shortDescription, description, category, price, duration, benefits, includes, professional,image } = data;
 
+    const professionalRef = db.doc(professional);
+
     const snapshot = await db.collection("services")
-        .where("professional", "==", db.doc(professional))
+        .where("professional", "==", db.doc(professionalRef))
         .get();
 
     const duplicate = snapshot.docs.find(doc => {
@@ -121,9 +123,9 @@ const createService = async (data) => {
             s.category === category &&
             s.price === price &&
             s.duration === duration &&
-            s.benefits === benefits &&
-            s.includes === includes &&
-            s.image === image || null
+            JSON.stringify(s.benefits) === JSON.stringify(benefits) &&
+            JSON.stringify(s.includes) === JSON.stringify(includes) &&
+            (s.image || null) === image;
     });
 
     if (duplicate) {
@@ -142,7 +144,7 @@ const createService = async (data) => {
         benefits,
         includes,
         state: true,
-        professional: db.doc(professional)
+        professional: professionalRef
     });
 
     return { isOK: true };

@@ -61,9 +61,16 @@ const getService = async (state, category, rol, userId) => {
 };
 
 //actualizar el servicio por id
-const updateService = async (id, serviceData) => {
+const updateService = async (id, serviceData, professionalPath) => {
     try {
         const doc = db.collection("services").doc(id);
+
+        /*const professionalRef = typeof professionalPath === 'string'
+            ? db.doc(professionalPath)
+            : professionalPath;
+
+        serviceData.professional = professionalRef;*/
+
         const snapshot = await doc.get();
 
         if (!snapshot.exists) {

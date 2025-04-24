@@ -44,10 +44,6 @@ const updateService = async (req, res) => {
         if (!updates || Object.keys(updates).length === 0)
             return res.status(200).json({ message: "Datos de actualización vacíos" });
 
-        if (updates.professional && typeof updates.professional === "string") {
-            updates.professional = db.doc(updates.professional);
-        }
-
         const updated = await ServiceModel.updateService(id, updates);
 
         if (!updated.isOK)

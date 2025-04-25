@@ -1,22 +1,5 @@
-const db = require("../config/firebase");
+const db = require("../firebase");
 
-//creando servicio
-//EJEMPLO
-// {
-//     "category": "Yoga",
-//     "shortDescription: "xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
-//     "description": "Sesiones grupales que combinan posturas, respiración y meditación para el bienestar físico y mental.",
-//     "duration": 60,
-//     "image": "https://i.pinimg.com/736x/bd/40/70/bd40706a5caf46f4139a021298f48ad4.jpg",
-//     "isIndividual": false,
-//      "benefits": ["xxxxxx","xxxxxxxxx","xxxxxxxxxx"],
-//      "includes" : ["xxxxx,xxxx,xxxx"]
-//     "name": "Yoga",
-//     "price": 200100
-//     "professional": /users/RL9UjLDxsVNkJ72ErDod (referencia real)
-//   }
-
-//traer todos los servicios
 const getService = async (state, category, rol, userId) => {
     let query = db.collection("services");
 
@@ -60,7 +43,6 @@ const getService = async (state, category, rol, userId) => {
     return response;
 };
 
-//actualizar el servicio por id
 const updateService = async (id, serviceData) => {
     try {
         const doc = db.collection("services").doc(id);
@@ -82,8 +64,6 @@ const updateService = async (id, serviceData) => {
     }
 };
 
-
-//borrado logico por id
 const deleteService = async (id) => {
     const snapshot = await db.collection("services").doc(id).get();
     if (!snapshot.exists) return { isOK: false, message: "No se encontró el servicio" };
@@ -94,8 +74,6 @@ const deleteService = async (id) => {
     return { isOK: true };
 };
 
-
-//activado por id
 const activeService = async (id) => {
     const snapshot = await db.collection("services").doc(id).get();
     if (!snapshot.exists) return { isOK: false, message: "No se encontró el servicio" };
@@ -131,8 +109,7 @@ const createService = async (data) => {
     if (duplicate) {
         return { isOK: false, message: "El servicio ya existe" };
     }
-
-    // Crear el nuevo servicio
+    
     await db.collection("services").add({
         name,
         description,

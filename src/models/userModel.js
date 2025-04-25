@@ -1,4 +1,4 @@
-const db = require("../config/firebase");
+const db = require("../firebase");
 
 const getUsers = async (userType, state) => {
     let query = db.collection("users");

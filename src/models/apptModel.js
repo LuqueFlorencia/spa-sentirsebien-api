@@ -1,4 +1,4 @@
-const db = require("../config/firebase");
+const db = require("../firebase");
 
 const getAppts = async(rol, userId, state) => {
     let query = db.collection("appointments");
@@ -173,4 +173,11 @@ const updateAppt = async (id, apptData) => {
 };
 
 
-module.exports = { getAppts, getAvailableSlots, createAppointment, cancelAppt, confirmAppt, updateAppt };
+module.exports = { 
+    getAppts, 
+    getAvailableSlots, 
+    createAppointment, 
+    cancelAppt, 
+    confirmAppt, 
+    updateAppt 
+};

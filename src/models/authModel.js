@@ -1,4 +1,4 @@
-const db = require("../config/firebase");
+const db = require("../firebase");
 
 const searchUser = async(email) => {
     const snapshot = await db.collection("users")

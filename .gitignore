@@ -11,6 +11,9 @@ pnpm-debug.log
 .env.development
 .env.production
 
+# Backup
+backups/
+
 # 🔥 Caché y Logs
 logs
 *.log

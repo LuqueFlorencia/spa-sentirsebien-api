@@ -90,9 +90,9 @@ const createService = async (data) => {
     const professionalRef = db.doc(professional);
 
     const snapshot = await db.collection("services")
-        .where("professional", "==", db.doc(professionalRef))
+        .where("professional", "==", professionalRef)
         .get();
-
+    
     const duplicate = snapshot.docs.find(doc => {
         const s = doc.data();
         return s.name === name &&
@@ -105,7 +105,7 @@ const createService = async (data) => {
             JSON.stringify(s.includes) === JSON.stringify(includes) &&
             (s.image || null) === image;
     });
-
+    
     if (duplicate) {
         return { isOK: false, message: "El servicio ya existe" };
     }
@@ -123,7 +123,7 @@ const createService = async (data) => {
         state: true,
         professional: professionalRef
     });
-
+    
     return { isOK: true };
 };
 

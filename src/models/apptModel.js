@@ -71,7 +71,7 @@ const getAvailableSlots = async (serviceId, date) => {
     const profData = profSnap.data();
     const availability = profData.availability;
 
-    const dayName = ["lunes", "martes", "miercoles", "jueves", "viernes", "sabado","domingo"]; 
+    const dayName = ["lunes", "martes", "miércoles", "jueves", "viernes", "sábado", "domingo"]; 
     const weekday = dayName[new Date(date).getDay()];
 
     const dayBlock = availability.find(d => d.day === weekday);

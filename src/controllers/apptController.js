@@ -1,5 +1,7 @@
 const ApptModel = require("../models/apptModel");
-const jwt = require("jsonwebtoken");
+const { generateInvoicePDF } = require("../services/pdfService");
+const { sendInvoiceEmail } = require("../services/emailService");
+const { json } = require("express");
 require('dotenv').config(); 
 
 //SOLO LOS ADMIN PUEDEN HACER CAMBIOS EN LA BD SOBRE TURNOS 
@@ -88,27 +90,47 @@ function isValidDate(fecha) {
 const newAppt = async (req, res) => {
     try{
         const { serviceId, date, hour, notes } = req.body;
+        const userType = req.user.userType;
         const clienteId = req.user.id;
         const validUsers = ["admin", "profesional", "cliente"];
 
-        if (!validUsers.includes(req.user.userType))
-            return res.status(403).json({ message: "No autorizado para solicitar un turno" });
+        if (!validUsers.includes(userType))
+            return res.json({ status: 403, message: "No autorizado para solicitar un turno" });
 
         if (!serviceId || !date || !hour)
-            return res.status(400).json({ message: "Faltan campos obligatorios para solicitud de turno" });
+            return res.json({ status: 400, message: "Faltan campos obligatorios para solicitud de turno" });
 
         if (!isValidDate(date))
-            return res.status(400).json({ message: 'Formato de fecha inválido (YYYY-MM-DD)' });
+            return res.json({ status: 400, message: 'Formato de fecha inválido (YYYY-MM-DD)' });
 
         const response = await ApptModel.createAppointment({ serviceId, clienteId, date, hour, notes });
         if (!response.isOK)
-            return res.status(400).json({ message: response.message });
-
-        return res.status(200).json({ message: "Turno reservado exitosamente. Id: " + response.id });
-    } catch (error) {
-        console.log(JSON.stringify(error));
+            return res.json({ status: 400, message: response.message });
         
-        return res.status(500).json({ message: "Error al registrar turno", error });
+        // Generar PDF
+        const appointment = await ApptModel.getApptById(response.id);
+        const pdfStream = await generateInvoicePDF(appointment);
+
+        // Enviar email
+        await sendInvoiceEmail({
+            to: appointment.serviceId.clientEmail,
+            subject: "Confirmación de Turno - Sentirse Bien Spa",
+            text: `¡Hola ${appointment.serviceId.clientLastname}!
+
+                Tu turno fue reservado exitosamente para el día ${appointment.date} a las ${appointment.hour} hs.
+
+                Servicio: ${appointment.serviceId.name}
+                Profesional: ${appointment.serviceId.professionalLastname}
+
+                Gracias por elegirnos.
+                Sentirse Bien SPA.`,
+            pdfStream,
+            filename: `turno-${appointment.serviceId.clientLastname}.pdf`
+        });
+
+        return res.json({ status: 200, message: "Turno reservado e email enviado exitosamente. Id: " + response.id });
+    } catch (error) {       
+        return res.json({ status: 500, message: "Error al registrar turno", error });
     }
 };
 

@@ -10,7 +10,6 @@ const getAppts = async(rol, userId, state) => {
 
     if (state) 
         query = query.where("state", "==", state);
-    
     const snapshot = await query.get();
     if (snapshot.empty) return [];
 
@@ -51,11 +50,53 @@ const getAppts = async(rol, userId, state) => {
                 price: serviceData?.price,
                 paymentStatus: data.paymentStatus
             };
-        }
+        }        
         return appointment;
     }));
 
     return response;
+};
+
+const getApptById = async (id) => {
+    const doc = await db.collection("appointments").doc(id).get();
+    if (!doc.exists) return null;
+
+    const data = doc.data();
+    const appointment = {
+        id: doc.id,
+        state: data.state,
+        date: data.date,
+        hour: data.hour,
+        notes: data.notes
+    };
+
+    if (data.clientId && typeof data.clientId.get === "function") {
+        const clientSnap = await data.clientId.get();
+        const clientData = clientSnap.data();
+        appointment.client = clientData;
+    }
+
+    if (data.serviceId && typeof data.serviceId.get === "function") {
+        const serviceSnap = await data.serviceId.get();
+        const serviceData = serviceSnap.data();
+
+        const professionalSnap = await serviceData.professional.get();
+        const professionalData = professionalSnap.data();
+
+        appointment.serviceId = {
+            id: data.serviceId.id,
+            name: serviceData.name,
+            professionalId: serviceData.professional.id,
+            professionalLastname: `${professionalData.lastname}, ${professionalData.name}`,
+            clientEmail: appointment.client?.email,
+            clientLastname: `${appointment.client?.lastname}, ${appointment.client?.name}`,
+            duration: serviceData.duration,
+            price: serviceData.price,
+            paymentStatus: data.paymentStatus
+        };
+    }
+
+    return appointment;
 };
 
 const getAvailableSlots = async (serviceId, date) => {
@@ -175,6 +216,7 @@ const updateAppt = async (id, apptData) => {
 
 module.exports = { 
     getAppts, 
+    getApptById,
     getAvailableSlots, 
     createAppointment, 
     cancelAppt, 

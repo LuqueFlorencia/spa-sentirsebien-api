@@ -179,4 +179,6 @@ router.put("/confirm/:id", authMiddleware, apptController.confirmAppt); //appoin
  */
 router.put("/:id", authMiddleware, apptController.updateAppt); //appointments/{id}
 
+router.post("/pdf", authMiddleware, apptController.pdfGenerate); //appointments/pdf
+
 module.exports = router; 

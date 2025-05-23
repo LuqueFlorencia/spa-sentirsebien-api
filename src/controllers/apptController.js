@@ -1,7 +1,7 @@
 const ApptModel = require("../models/apptModel");
-const { generateInvoicePDF } = require("../services/pdfService");
+const { generateInvoicePDF } = require("../services/apptPdf");
 const { sendInvoiceEmail } = require("../services/emailService");
-const { json } = require("express");
+const { printAppointmentPDF } = require("../services/printPdf");
 require('dotenv').config(); 
 
 //SOLO LOS ADMIN PUEDEN HACER CAMBIOS EN LA BD SOBRE TURNOS 
@@ -16,7 +16,6 @@ require('dotenv').config();
   "state": "confirmado",  // ["confirmado", "cancelado", "completado", "pendiente"]
   "notes": "Alergia a lavanda", // (opcional)
 } */
-
 
 // Obtener todos los turnos
 const getAppts = async (req, res) => {
@@ -191,5 +190,28 @@ const confirmAppt = async (req,res) => {
         return res.status(500).json({ message: "Error al confirmar turno", error })
     }
 };
+
+const pdfGenerate = async (req, res) => {
+    try {
+        const userType = req.user.userType;
+        const appointment = req.body;      
+
+        if (userType !== "profesional")
+            return res.status(403).json({ status: 403, message: "No autorizado para imprimir turnos" });
+
+        const pdfBytes  = await printAppointmentPDF(appointment);
+
+        res.set({
+            'Content-Type': 'application/pdf',
+            'Content-Disposition': `attachment; filename=Cita_${appointment.id}.pdf`,
+            'Content-Length': pdfBytes.length,
+        });
+
+        return res.send(Buffer.from(pdfBytes));
+    } catch (error) {
+        console.error(error);
+        return res.status(500).json({ status: 500, message: "Error al imprimir turno", error })
+    }
+}
   
-module.exports = { getAppts, getAvailableSlots, newAppt, cancelAppt, confirmAppt, updateAppt };
+module.exports = { getAppts, getAvailableSlots, newAppt, cancelAppt, confirmAppt, updateAppt, pdfGenerate };

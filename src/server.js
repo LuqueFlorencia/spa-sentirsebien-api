@@ -11,8 +11,16 @@ const userRoutes = require("./routes/userRoutes");
 const apptRoutes = require("./routes/apptRoutes");
 const serviceRoutes = require("./routes/serviceRoutes");
 
+const allowedOrigins = ['http://localhost:5173', 'https://spa-sentirsebien.vercel.app'];
+
 const app = express();
-app.use(cors());
+app.use(cors({
+    origin: (origin, callback) => {
+		if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
+		return callback(new Error('Not allowed by CORS'));
+    },
+  credentials: true,
+}));
 app.use(express.json());
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
